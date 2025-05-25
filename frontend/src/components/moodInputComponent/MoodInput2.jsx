@@ -106,7 +106,7 @@ const MoodInput2 = () => {
     setError("");
     setSuccess("");
     setChatMessages([
-      { type: 'ai', text: "Hello! I'm Kona, your AI emotional support companion. How are you feeling today? I'm here to listen and chat with you." }
+      { type: 'ai', text: "Hello! I'm AI-Kona, your AI emotional support companion. How are you feeling today? I'm here to listen and chat with you." }
     ]);
   }
 

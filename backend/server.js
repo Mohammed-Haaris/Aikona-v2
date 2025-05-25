@@ -9,7 +9,9 @@ const PORT = process.env.PORT || 5000;
 
 // Enable CORS for all routes
 app.use(cors({
-  origin: '*', // In production, replace with your frontend URL
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.FRONTEND_URL 
+    : '*',
   methods: ['GET', 'POST'],
   credentials: true
 }));
