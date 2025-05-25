@@ -9,8 +9,11 @@ const Home = () => {
 
   function navigateMoodPageBtn() {
     navigate("/moodinput");
+  
   }
-
+  function navigateAboutPageBtn(){
+    navigate("/About")
+  }
   return (
     <>
       <div className="container-fluid home-container d-flex flex-column justify-content-center align-items-center text-center">
@@ -21,6 +24,9 @@ const Home = () => {
         </p>
         <button className="button" onClick={navigateMoodPageBtn}>
           Click here to Continue
+        </button>
+        <button className="button" onClick={navigateAboutPageBtn}>
+          About AI-Kona & Founder
         </button>
       </div>
     </>

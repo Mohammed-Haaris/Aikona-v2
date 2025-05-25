@@ -3,7 +3,7 @@ import "./MoodInput.css";
 import { useState, useEffect, useRef } from "react";
 import axios from 'axios';
 
-// Get the API URL from environment variables
+// Get the API URL from environment variables or fallback to localhost
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
 const MoodInput2 = () => {
@@ -14,7 +14,7 @@ const MoodInput2 = () => {
   const [isConnected, setIsConnected] = useState(false);
   const messagesEndRef = useRef(null);
   const [chatMessages, setChatMessages] = useState([
-    { type: 'ai', text: "Hello! I'm Kona, your AI emotional support companion. How are you feeling today? I'm here to listen and chat with you." }
+    { type: 'ai', text: "Hello! I'm AI-Kona, your AI emotional support companion. How are you feeling today? I'm here to listen and chat with you." }
   ]);
   const [apiKeyMissing, setApiKeyMissing] = useState(false);
 
@@ -175,15 +175,16 @@ const MoodInput2 = () => {
             
             <div className="chat-buttons mt-2">
               <button 
-                type="submit" 
+                type="submit " 
                 disabled={isLoading || !isConnected}
-                className={isLoading ? 'loading' : ''}
+                className={isLoading ? 'loading' : 'button'} 
               >
                 {isLoading ? 'Sending...' : 'Send'}
               </button>
               <button 
                 type="button" 
-                className="ms-3" 
+             
+                className="button ms-3" 
                 onClick={clear} 
                 disabled={isLoading}
               >
