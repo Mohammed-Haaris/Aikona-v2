@@ -1,31 +1,15 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const OpenAI = require('openai');
 const sentiment = require('sentiment');
-require('dotenv').config();
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
-// Enable CORS for the frontend URL
-const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:5174',
-  'http://localhost:5173',
-  'http://localhost:5175',
-  'http://localhost:5176',
-  'http://localhost:5177'
-];
-
+// Enable CORS for all routes
 app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
+  origin: '*', // In production, replace with your frontend URL
   methods: ['GET', 'POST'],
   credentials: true
 }));
@@ -40,93 +24,77 @@ const openai = new OpenAI({
   timeout: 60000
 });
 
+// Sentiment analyzer
 const sentimentAnalyzer = new sentiment();
 
-// Helper function to generate emotional context for AI
-const getEmotionalContext = (sentimentScore) => {
-  if (sentimentScore <= -4) {
-    return "The user is expressing severe distress or negative emotions. Respond with maximum empathy, support, and if necessary, encourage seeking professional help.";
-  } else if (sentimentScore <= -2) {
-    return "The user is expressing moderate distress or negative emotions. Provide emotional support, validation, and gentle coping suggestions.";
-  } else if (sentimentScore < 0) {
-    return "The user is expressing mild negative emotions. Show understanding and offer gentle encouragement while validating their feelings.";
-  } else if (sentimentScore === 0) {
-    return "The user's emotional state is neutral or unclear. Help explore their feelings and encourage deeper expression.";
-  } else if (sentimentScore <= 2) {
-    return "The user is expressing mild positive emotions. Reinforce these positive feelings and explore what's working well.";
-  } else if (sentimentScore <= 4) {
-    return "The user is expressing moderate positive emotions. Celebrate their positive state and encourage reflection on what led to these good feelings.";
-  } else {
-    return "The user is expressing strong positive emotions. Share in their joy while helping them anchor and build upon these positive experiences.";
-  }
-};
+// Function to get emotional context based on sentiment score
+function getEmotionalContext(score) {
+  if (score <= -5) return "I sense you're feeling quite negative. I'm here to support you.";
+  if (score < 0) return "I notice you might be feeling a bit down. Would you like to talk about it?";
+  if (score === 0) return "I'm here to listen and chat with you.";
+  if (score <= 5) return "I sense some positivity in your message. Would you like to share more?";
+  return "I can tell you're feeling quite positive! That's wonderful!";
+}
 
-// Test endpoint with API check
+// Test endpoint
 app.get('/api/test', async (req, res) => {
   try {
-    // Test the Groq API connection
+    console.log('Testing API connection with key:', process.env.GROQ_API_KEY ? 'Key exists' : 'No key found');
     const completion = await openai.chat.completions.create({
-      model: "llama3-8b-8192",
+      model: "llama-3.3-70b-versatile",
       messages: [{ role: "user", content: "Hello" }],
       max_tokens: 5
     });
-    console.log('API Test Response:', completion);
+    console.log('API Test successful');
     res.json({ status: 'ok', message: 'Backend server and API are running properly!' });
   } catch (error) {
-    console.error('API Test Error:', error);
+    console.error('API Test Error:', error.message);
+    console.error('Full error:', error);
     res.status(500).json({ 
       status: 'error', 
       message: 'API test failed',
-      error: error.message 
+      error: error.message,
+      details: {
+        name: error.name,
+        code: error.code,
+        type: error.type
+      }
     });
   }
 });
 
+// Chat endpoint
 app.post('/api/chat', async (req, res) => {
   try {
-    console.log('Received chat request:', req.body);
     const { message, chatHistory } = req.body;
 
     if (!message) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
+    console.log('Processing chat request with message:', message);
+    
     // Analyze sentiment
     const sentimentResult = sentimentAnalyzer.analyze(message);
     console.log('Sentiment analysis:', sentimentResult);
     const emotionalContext = getEmotionalContext(sentimentResult.score);
 
-    // Format chat history for Groq
+    // Format chat history
     const formattedHistory = chatHistory.map(msg => ({
       role: msg.type === 'user' ? 'user' : 'assistant',
       content: msg.text
     }));
 
-    // Create system message with emotional context
+    // Create system message
     const systemMessage = {
       role: 'system',
-      content: `You are an empathetic AI counselor named Kona, specialized in providing emotional support and guidance. 
-                ${emotionalContext}
-                Focus on: 
-                1. Active listening and validation
-                2. Emotional support and understanding
-                3. Gentle guidance and coping strategies when appropriate
-                4. Open-ended questions to encourage expression
-                5. Maintaining a warm, supportive tone
-                Always prioritize the user's emotional well-being and safety.
-                Keep responses concise but meaningful, around 2-3 sentences.`
+      content: `You are an empathetic AI counselor named Kona. Your goal is to provide emotional support and understanding. Current emotional context: ${emotionalContext}`
     };
 
-    console.log('Preparing Groq API request with messages:', {
-      systemMessage,
-      history: formattedHistory,
-      userMessage: message
-    });
-
-    console.log('Sending request to Groq...');
+    console.log('Sending request to Groq API...');
     // Get response from Groq
     const completion = await openai.chat.completions.create({
-      model: "llama3-8b-8192",
+      model: "llama-3.3-70b-versatile",
       messages: [
         systemMessage,
         ...formattedHistory,
@@ -136,47 +104,30 @@ app.post('/api/chat', async (req, res) => {
       max_tokens: 150
     });
 
-    console.log('Raw Groq API response:', completion);
-    const aiResponse = completion.choices[0].message.content;
-    console.log('Processed response from Groq:', aiResponse);
-
-    res.json({
-      response: aiResponse,
-      sentiment: sentimentResult.score
-    });
+    console.log('Received response from Groq API');
+    const response = completion.choices[0].message.content;
+    res.json({ response });
 
   } catch (error) {
-    console.error('Error in /api/chat:', error);
-    console.error('Error details:', {
+    console.error('Chat Error:', error.message);
+    console.error('Full error details:', {
       name: error.name,
       message: error.message,
-      status: error.response?.status,
-      data: error.response?.data,
-      stack: error.stack
+      code: error.code,
+      type: error.type
     });
     
-    // Send appropriate error message based on the type of error
-    if (error.response?.status === 429) {
-      res.status(429).json({ error: 'Rate limit exceeded. Please try again later.' });
-    } else if (error.response?.status === 401) {
-      res.status(401).json({ error: 'Invalid Groq API key. Please check your configuration.' });
-    } else if (error.message.includes('api_key')) {
-      res.status(401).json({ error: 'Groq API key error: Please ensure your API key is properly configured.' });
-    } else if (error.message.includes('ECONNREFUSED') || error.message.includes('ETIMEDOUT')) {
-      res.status(503).json({ error: 'Unable to connect to Groq API. Please try again later.' });
-    } else if (error.message.includes('model')) {
-      res.status(400).json({ error: 'Invalid model configuration. Please check the model name and try again.' });
-    } else {
-      res.status(500).json({ 
-        error: 'An error occurred while processing your request',
-        details: error.message 
-      });
-    }
+    // Send more detailed error response
+    res.status(500).json({ 
+      error: error.message,
+      details: {
+        type: error.type,
+        code: error.code
+      }
+    });
   }
 });
 
-const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`CORS enabled for origins:`, allowedOrigins);
+  console.log(`Server is running on port ${PORT}`);
 }); 
