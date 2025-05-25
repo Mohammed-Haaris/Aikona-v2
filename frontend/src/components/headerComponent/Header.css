@@ -1,0 +1,22 @@
+/** @format */
+
+.header-title {
+  color: whitesmoke;
+  font-size: 120px;
+}
+
+.header-subtitle {
+  color: whitesmoke;
+  font-size: 50px;
+}
+
+@media (min-width: 320px) and (max-width: 720px) {
+  .header-title {
+    color: whitesmoke;
+    font-size: 70px;
+  }
+  .header-subtitle {
+    color: whitesmoke;
+    font-size: 30px;
+  }
+}

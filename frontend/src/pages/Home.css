@@ -1,0 +1,25 @@
+/** @format */
+
+.home-container {
+  min-height: 100vh;
+  background: linear-gradient(to right, #141e30, #243b55);
+  color: white;
+}
+
+.button {
+  background: #141e30;
+  border-radius: 10px;
+  border: solid;
+  border-color: blanchedalmond;
+  color: whitesmoke;
+  padding-top: 10px;
+  padding-left: 8px;
+  padding-bottom: 10px;
+  padding-right: 8px;
+}
+
+.button:hover {
+  background: linear-gradient(to left, #243b55, #141e30);
+  color: whitesmoke;
+  border-radius: 20px;
+}
