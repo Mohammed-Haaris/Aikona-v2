@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 5000;
 // Enable CORS for all routes
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_URL 
+    ? ['https://aikona-frontend.onrender.com', 'http://localhost:5173']
     : '*',
   methods: ['GET', 'POST'],
   credentials: true

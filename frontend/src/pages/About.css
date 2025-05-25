@@ -1,9 +1,25 @@
-
 /** @format */
 
 .about-container {
   min-height: 100vh;
   background: linear-gradient(to right, #141e30, #243b55);
   color: white;
+  padding: 2rem 0;
 }
+
+.founder-image-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.founder-image {
+  transition: transform 0.3s ease;
+}
+
+.founder-image:hover {
+  transform: scale(1.05);
+}
+
+/* ... existing styles ... */
 

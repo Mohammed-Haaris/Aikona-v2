@@ -1,6 +1,7 @@
 import "./About.css";
 import { useNavigate } from "react-router-dom";
 import { Fade } from "react-awesome-reveal";
+import founderImage from '../assets/images/haaris3.jpg'; // Updated image import
 
 const About = () => {
   const navigate = useNavigate();
@@ -48,6 +49,21 @@ const About = () => {
             <Fade direction="up">
               <h2 className="text-center mb-4">Meet the Founder</h2>
               <div className="text-center mb-5">
+                <div className="founder-image-container mb-4">
+                  <img 
+                    src={founderImage} 
+                    alt="Mohammed Haaris" 
+                    className="founder-image"
+                    style={{
+                      width: '200px',
+                      height: '200px',
+                      borderRadius: '100%',
+                      objectFit: 'cover',
+                      border: '3px solid #8ec5fc',
+                      boxShadow: '0 0 20px rgba(142, 197, 252, 0.3)'
+                    }}
+                  />
+                </div>
                 <h3 className="display-4 fw-bold" style={{
                   background: 'linear-gradient(to right, #e0c3fc, #8ec5fc)',
                   WebkitBackgroundClip: 'text',
