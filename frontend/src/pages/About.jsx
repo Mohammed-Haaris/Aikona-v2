@@ -1,7 +1,7 @@
 import "./About.css";
 import { useNavigate } from "react-router-dom";
 import { Fade } from "react-awesome-reveal";
-import founderImage from '../assets/images/haaris3.jpg'; // Updated image import
+import founderImage from '../assets/haaris.jpg';
 
 const About = () => {
   const navigate = useNavigate();

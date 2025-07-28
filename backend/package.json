@@ -6,15 +6,25 @@
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
-  "keywords": ["ai", "emotional-support", "chatbot"],
+  "keywords": [
+    "ai",
+    "emotional-support",
+    "chatbot"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "description": "",
   "dependencies": {
+    "@huggingface/inference": "^3.14.0",
+    "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^4.18.2",
+    "form-data": "^4.0.4",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.16.1",
+    "node-fetch": "^2.7.0",
     "openai": "^4.24.1",
     "sentiment": "^5.0.2"
   },
