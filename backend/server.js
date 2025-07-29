@@ -458,19 +458,26 @@ function authenticateToken(req, res, next) {
 
 // Signup endpoint
 app.post("/api/signup", async (req, res) => {
+  console.log('Signup request received:', req.body);
+  
   const { username, email, password, profilePic } = req.body;
-  if (!username || !email || !password)
+  if (!username || !email || !password) {
+    console.log('Missing required fields:', { username: !!username, email: !!email, password: !!password });
     return res
       .status(400)
       .json({ error: "Username, email and password required" });
+  }
+  
   try {
     console.log('Signup attempt for:', username, email);
     
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-    if (existingUser)
+    if (existingUser) {
+      console.log('User already exists:', existingUser.username);
       return res
         .status(400)
         .json({ error: "Email or username already registered" });
+    }
     
     const hashed = await bcrypt.hash(password, 10);
     const user = new User({ username, email, password: hashed, profilePic });
