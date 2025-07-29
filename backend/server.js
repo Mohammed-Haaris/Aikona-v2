@@ -143,6 +143,7 @@ app.get("/", (req, res) => {
       health: "/api/health",
       test: "/api/test",
       chat: "/api/chat",
+      "chat-public": "/api/chat-public",
       signup: "/api/signup",
       login: "/api/login"
     }
@@ -206,6 +207,35 @@ app.get("/api/test", async (req, res) => {
         error: error.message,
       });
     }
+  }
+});
+
+// Public chat endpoint for testing (no authentication)
+app.post("/api/chat-public", async (req, res) => {
+  try {
+    const { message } = req.body;
+    if (!message) {
+      return res.status(400).json({ error: "Message is required" });
+    }
+
+    // Analyze sentiment
+    const sentimentResult = sentimentAnalyzer.analyze(message);
+    const emotionalContext = getEmotionalContext(sentimentResult.score);
+    
+    const messages = [
+      {
+        role: "system",
+        content: `You are Aikona, an empathetic AI counselor. Be warm, understanding, and supportive. Use emojis naturally to enhance emotional connection. Current context: ${emotionalContext}`,
+      },
+      { role: "user", content: message }
+    ];
+
+    // Call Groq API with retry mechanism
+    const aiResponse = await makeGroqRequest(messages);
+
+    res.json({ response: aiResponse });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
