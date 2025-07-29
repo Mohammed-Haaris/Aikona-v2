@@ -123,10 +123,12 @@ async function makeGroqRequest(messages, retries = 3) {
 // Enable CORS for all routes
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? ["https://aikona-frontend.onrender.com", "http://localhost:5173"]
-        : "*",
+    origin: [
+      "https://aikona-v2.vercel.app",
+      "https://aikona-frontend.onrender.com", 
+      "http://localhost:5173",
+      "http://localhost:3000"
+    ],
     methods: ["GET", "POST", "DELETE"],
     credentials: true,
   })
