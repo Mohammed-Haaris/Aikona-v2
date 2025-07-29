@@ -374,7 +374,12 @@ app.post(
 );
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/aikona");
+mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/aikona", {
+  ssl: true,
+  sslValidate: false,
+  retryWrites: true,
+  w: 'majority'
+});
 
 // JWT middleware
 function authenticateToken(req, res, next) {
