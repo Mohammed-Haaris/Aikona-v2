@@ -431,13 +431,17 @@ app.post(
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/aikona", {
   retryWrites: true,
-  w: 'majority'
+  w: 'majority',
+  maxPoolSize: 10,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
 })
 .then(() => {
   console.log('Connected to MongoDB successfully');
 })
 .catch((err) => {
   console.error('MongoDB connection error:', err);
+  console.log('MongoDB URI:', process.env.MONGO_URI ? 'Set' : 'Not set');
 });
 
 // JWT middleware
@@ -460,17 +464,23 @@ app.post("/api/signup", async (req, res) => {
       .status(400)
       .json({ error: "Username, email and password required" });
   try {
+    console.log('Signup attempt for:', username, email);
+    
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser)
       return res
         .status(400)
         .json({ error: "Email or username already registered" });
+    
     const hashed = await bcrypt.hash(password, 10);
     const user = new User({ username, email, password: hashed, profilePic });
     await user.save();
+    
+    console.log('User created successfully:', username);
     res.json({ message: "Signup successful" });
   } catch (err) {
-    res.status(500).json({ error: "Signup failed" });
+    console.error('Signup error:', err);
+    res.status(500).json({ error: "Signup failed: " + err.message });
   }
 });
 
