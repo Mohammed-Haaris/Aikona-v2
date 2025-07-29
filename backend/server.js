@@ -134,6 +134,21 @@ app.use(
 
 app.use(express.json());
 
+// Root endpoint
+app.get("/", (req, res) => {
+  res.json({
+    message: "Aikona Backend API",
+    status: "running",
+    endpoints: {
+      health: "/api/health",
+      test: "/api/test",
+      chat: "/api/chat",
+      signup: "/api/signup",
+      login: "/api/login"
+    }
+  });
+});
+
 // Sentiment analyzer
 const sentimentAnalyzer = new sentiment();
 
@@ -148,6 +163,16 @@ function getEmotionalContext(score) {
     return "I sense some positivity in your message. Would you like to share more?";
   return "I can tell you're feeling quite positive! That's wonderful!";
 }
+
+// Simple health check endpoint
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "ok",
+    message: "Backend server is running!",
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || "development"
+  });
+});
 
 // Test endpoint
 app.get("/api/test", async (req, res) => {
