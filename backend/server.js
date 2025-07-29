@@ -44,6 +44,8 @@ async function makeGroqRequest(messages, retries = 3) {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const response = await fetch(
+
+        
         "https://api.groq.com/openai/v1/chat/completions",
         {
           method: "POST",
