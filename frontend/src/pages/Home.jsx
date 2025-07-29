@@ -9,10 +9,9 @@ const Home = () => {
 
   function navigateMoodPageBtn() {
     navigate("/moodinput");
-  
   }
-  function navigateAboutPageBtn(){
-    navigate("/About")
+  function navigateAboutPageBtn() {
+    navigate("/About");
   }
   return (
     <>

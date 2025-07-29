@@ -21,6 +21,7 @@ const MoodInput2 = () => {
   const [chatMessages, setChatMessages] = useState([]);
   const [apiKeyMissing, setApiKeyMissing] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const navigate = useNavigate();
 
   const username = localStorage.getItem("username") || "User";
@@ -58,8 +59,9 @@ const MoodInput2 = () => {
       }
     };
     checkConnection();
-    const interval = setInterval(checkConnection, 30000);
-    return () => clearInterval(interval);
+    // Temporarily disabled aggressive polling
+    // const interval = setInterval(checkConnection, 30000);
+    // return () => clearInterval(interval);
   }, []);
 
   // Load chat history on mount
@@ -190,12 +192,56 @@ const MoodInput2 = () => {
     }
   };
 
-  function clear() {
-    setMoodText("");
-    setError("");
-    setSuccess("");
-    setChatMessages([]);
-  }
+  const handleClearClick = () => {
+    setShowClearConfirm(true);
+  };
+
+  const clear = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      console.log("Token exists:", !!token);
+      
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      console.log("Making clear chat request to:", `${API_URL}/api/clear-chat`);
+      
+      // Call API to delete all messages from database
+      const response = await axios.delete(`${API_URL}/api/clear-chat`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      console.log("Clear chat response:", response.data);
+
+      // Clear local state
+      setMoodText("");
+      setError("");
+      setSuccess("");
+      setChatMessages([]);
+      
+      // Show success message
+      setSuccess("Chat history cleared successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+      
+      // Hide confirmation dialog
+      setShowClearConfirm(false);
+    } catch (error) {
+      console.error("Error clearing chat:", error);
+      console.error("Error response:", error.response?.data);
+      console.error("Error status:", error.response?.status);
+      
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        localStorage.removeItem("token");
+        navigate("/login");
+      } else {
+        setError(`Failed to clear chat history: ${error.response?.data?.error || error.message}`);
+        setTimeout(() => setError(""), 5000);
+      }
+      setShowClearConfirm(false);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -417,7 +463,7 @@ const MoodInput2 = () => {
           </div>
         )}
         {!isConnected && !apiKeyMissing && (
-          <div className="alert alert-warning">
+          <div className="alert alert-warning mt-5">
             Trying to connect to AI service...
           </div>
         )}
@@ -581,7 +627,7 @@ const MoodInput2 = () => {
               onChange={(e) => setMoodText(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type your message here... (Press Enter to send)"
-              disabled={isLoading || !isConnected}
+              disabled={!isConnected}
               style={{
                 resize: "none",
                 minHeight: "44px",
@@ -594,17 +640,17 @@ const MoodInput2 = () => {
             {success && <p className="text-success">{success}</p>}
             <div className="chat-buttons mt-2">
               <button
-                type="submit "
-                disabled={isLoading || !isConnected}
-                className={isLoading ? "loading" : "button"}
+                type="submit"
+                disabled={!isConnected}
+                className="button"
               >
-                {isLoading ? "Sending..." : "Send"}
+                Send
               </button>
               <button
                 type="button"
                 className="button ms-3"
-                onClick={clear}
-                disabled={isLoading}
+                onClick={handleClearClick}
+
               >
                 Clear Chat
               </button>
@@ -612,6 +658,71 @@ const MoodInput2 = () => {
           </form>
         </div>
       </div>
+
+      {/* Clear Chat Confirmation Dialog */}
+      {showClearConfirm && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0, 0, 0, 0.7)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+          }}
+        >
+          <div
+            style={{
+              background: "#232b3b",
+              padding: "24px",
+              borderRadius: "12px",
+              maxWidth: "400px",
+              width: "90%",
+              textAlign: "center",
+              border: "1px solid #0084ff",
+            }}
+          >
+            <h5 style={{ color: "#fff", marginBottom: "16px" }}>
+              Clear Chat History?
+            </h5>
+            <p style={{ color: "#ccc", marginBottom: "20px" }}>
+              This will permanently delete all your chat messages. This action cannot be undone.
+            </p>
+            <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
+              <button
+                onClick={() => setShowClearConfirm(false)}
+                style={{
+                  padding: "8px 16px",
+                  background: "#444",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={clear}
+                style={{
+                  padding: "8px 16px",
+                  background: "#dc3545",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                }}
+              >
+                Clear All
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

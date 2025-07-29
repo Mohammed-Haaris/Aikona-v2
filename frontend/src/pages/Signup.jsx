@@ -16,7 +16,7 @@ const Signup = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [profilePic, setProfilePic] = useState('https://ui-avatars.com/api/?name=User&background=0084ff&color=fff&size=128');
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -40,7 +40,7 @@ const Signup = () => {
       const res = await fetch(`${API_URL}/api/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password, profilePic })
+        body: JSON.stringify({ username, email, password })
       });
       const data = await res.json();
       
@@ -142,17 +142,6 @@ const Signup = () => {
                 >
                   {showConfirmPassword ? "🙈" : "👁️"}
                 </button>
-              </div>
-
-              <div className="input-group">
-                <input
-                  type="url"
-                  placeholder="Profile Picture URL (optional)"
-                  value={profilePic}
-                  onChange={e => setProfilePic(e.target.value)}
-                  className="auth-input"
-                />
-                <div className="input-icon">🖼️</div>
               </div>
 
               <button 
