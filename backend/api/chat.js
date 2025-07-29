@@ -1,14 +1,16 @@
-import express from 'express';
-import cors from 'cors';
-import fetch from 'node-fetch';
-
-const app = express();
-
-app.use(cors());
-app.use(express.json());
-
-// Simple chat endpoint
+// Simple chat endpoint without Express
 export default async function handler(req, res) {
+  // Enable CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -20,7 +22,12 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    // Call Groq API
+    // Check if GROQ_API_KEY exists
+    if (!process.env.GROQ_API_KEY) {
+      return res.status(500).json({ error: 'GROQ_API_KEY not configured' });
+    }
+
+    // Call Groq API using native fetch
     const response = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",
       {
@@ -48,7 +55,8 @@ export default async function handler(req, res) {
     );
 
     if (!response.ok) {
-      throw new Error(`Groq API responded with status: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`Groq API responded with status: ${response.status} - ${errorText}`);
     }
 
     const completion = await response.json();
