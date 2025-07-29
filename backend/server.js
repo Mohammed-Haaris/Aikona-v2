@@ -375,10 +375,14 @@ app.post(
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/aikona", {
-  ssl: true,
-  sslValidate: false,
   retryWrites: true,
   w: 'majority'
+})
+.then(() => {
+  console.log('Connected to MongoDB successfully');
+})
+.catch((err) => {
+  console.error('MongoDB connection error:', err);
 });
 
 // JWT middleware
