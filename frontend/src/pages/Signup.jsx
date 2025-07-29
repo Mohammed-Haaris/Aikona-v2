@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Fade, Slide } from 'react-awesome-reveal';
 import './Auth.css';
 
-const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+const API_URL = (import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000').replace(/\/$/, '');
 console.log('API_URL:', API_URL);
 console.log('Environment variables:', import.meta.env);
 const aiAvatar = "https://ui-avatars.com/api/?name=AI&background=141e30&color=fff&size=128";
