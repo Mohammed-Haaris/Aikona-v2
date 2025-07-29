@@ -16,6 +16,10 @@
       "dest": "/api/test.js"
     },
     {
+      "src": "/api/chat",
+      "dest": "/api/chat.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "/server.js"
     }
