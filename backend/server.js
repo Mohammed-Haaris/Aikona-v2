@@ -371,8 +371,8 @@ app.post(
   }
 );
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/aikona");
+// Connect to MongoDB (commented out for Vercel deployment)
+// mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/aikona");
 
 // JWT middleware
 function authenticateToken(req, res, next) {
